@@ -1,7 +1,6 @@
 package ReadExcel;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -28,7 +27,7 @@ public class ReadExcel {
                     // Obtén el nombre del test case de la primera columna
                     Cell cell = row.getCell(1);
                     
-                    if (cell != null && cell.getCellType() == CellType.STRING) {
+                    if (cell.getCellType() == CellType.STRING) {
                         String testCaseName = cell.getStringCellValue();
                         testCasesToRun.put(testCaseName, row);
                     }
