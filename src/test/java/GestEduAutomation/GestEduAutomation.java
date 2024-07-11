@@ -1,5 +1,9 @@
 package GestEduAutomation;
 import static org.junit.Assert.assertTrue;
+
+import java.awt.Robot;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +18,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -146,6 +151,9 @@ public class GestEduAutomation {
                 case "agregarPlanEstudio":
                 	agregarPlanEstudio();
                     break;
+                case "altaCurso":
+                	altaCurso();
+                    break;
                 default:
                     System.out.println("Test case no reconocido: " + testCase);
                     break;
@@ -198,11 +206,6 @@ public class GestEduAutomation {
         }
 	}
 	
-
-	private void CloseBurgerMenu(WebDriverWait wait) {		
-		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/div/div[3]/div/button"))).click();
-        System.out.println("Clic en boton 'Cerrar menu'");
-	}
 
 	public void logout() {
 		
@@ -497,8 +500,148 @@ public class GestEduAutomation {
 	}
 	
 	
+	@SuppressWarnings("deprecation")
 	public void altaCurso() {
-		
+		String sMethodName = new String (Thread.currentThread().getStackTrace()[1].getMethodName());
+	    
+        try {
+        	PrintTestCase(sMethodName);
+        	
+        	webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(text(),'Funcionario')]")));            
+            System.out.println("Verificó la visibilidad del titulo 'Funcionario'");
+            
+            ClickBurgerMenu(webDriverWait);
+            
+            //BUSCA LA CARRERA
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText("Calendario"))).click();
+            System.out.println("Clic en enlance 'Calendario'");
+            
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(text(), 'Nombre')]")));  
+            System.out.println("Espera visibilidad columna 'Nombre'");
+                    
+            //Se mueve el mouse hasta el boton Menu de la columna nombre, para acceder al filtro.
+            WebElement hoverable = driver.findElement(By.xpath("//div[contains(text(), 'Nombre')]"));
+            Actions action = new Actions(driver);
+            action.moveToElement(hoverable).perform();       
+            Thread.sleep(1000);
+    		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(text(), 'Nombre')]/parent::div/parent::div/following-sibling::div/button"))).click();  
+            System.out.println("Click en menu columna 'Nombre'");            
+          
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[contains(text(),'Filter')]"))).click();  
+            System.out.println("Click en filter columna 'Nombre'");
+            
+            System.out.println("Carrera " + datosTestCase.get(9));            
+          
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\":r17:\"]"))).sendKeys(datosTestCase.get(9));
+            System.out.println("Ingresó el nombre de la carrera");            
+
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(text(),'" + datosTestCase.get(9) + "')]/following-sibling::div/following-sibling::div/following-sibling::div"))).click();  
+            System.out.println("Selecciona carrara " + datosTestCase.get(9));         
+
+            //BUSCA ASIGNATURA
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/main/section/div/div/div[2]/div/div[2]/div[1]/div[1]/div/div/div[3]")));  
+            System.out.println("Espera visibilidad columna 'Nombre'");
+                    
+            //Se mueve el mouse hasta el boton Menu de la columna nombre, para acceder al filtro.
+            WebElement hoverable2 = driver.findElement(By.xpath("/html/body/main/section/div/div/div[2]/div/div[2]/div[1]/div[1]/div/div/div[3]"));
+           
+            action = new Actions(driver);
+            action.moveToElement(hoverable2).perform();
+            System.out.println("Hover Nombre OK");            
+                        
+            driver.findElement(By.xpath("//div[contains(text(), 'Nombre')]/parent::*/parent::*/following-sibling::*/button")).click();
+    		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(text(), 'Nombre')]/parent::*/parent::*/following-sibling::*/button"))).click();  
+            System.out.println("Click en menu columna 'Nombre'");            
+          
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[contains(text(),'Filter')]"))).click();  
+            System.out.println("Click en filter columna 'Nombre'");
+          
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@placeholder='Filter value']"))).sendKeys(datosTestCase.get(11));
+            System.out.println("Ingresó el nombre de la asignatura");            
+			
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(text(),'" + datosTestCase.get(11) + "')]/following-sibling::div/following-sibling::div/following-sibling::div/following-sibling::div"))).click();  
+            System.out.println("Selecciona asignatura " + datosTestCase.get(9));        
+                        
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[contains(text(),'Registrar Fecha de Curso')]"))).click();
+            System.out.println("Click en boton 'Registrar Fecha de Curso'");
+            
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//label[contains(text(),'Docente')]")));
+            System.out.println("Espera visibilidad 'Docente'");
+             
+            
+            Robot robot = new Robot(); 
+            WebElement dateInputElement = driver.findElement(By.xpath("/html/body/main/section/div/div/label[1]"));
+            
+            robot.mouseMove(dateInputElement.getLocation().getX(), dateInputElement.getLocation().getY()+120);
+            robot.mousePress(InputEvent.BUTTON1_MASK);
+            robot.mouseRelease(InputEvent.BUTTON1_MASK);
+
+            String expectedDate = datosTestCase.get(17);
+            for (char c : expectedDate.toCharArray()) {
+              robot.keyPress(Character.toUpperCase(c));
+              robot.delay(50); // Adjust delay if needed
+              robot.keyRelease(Character.toUpperCase(c));
+            }
+
+            // Press Tab or Enter
+            robot.keyPress(KeyEvent.VK_TAB); // Or KeyEvent.VK_ENTER if needed
+            robot.delay(100); // Adjust delay if needed
+            robot.keyRelease(KeyEvent.VK_TAB); // Or KeyEvent.VK_ENTER if needed
+            
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.name("fechaInicio")));
+            System.out.println("Espera visibilidad 'fechaInicio'");
+            
+            WebElement dateInputElementFin = driver.findElement(By.name("fechaInicio"));
+            
+            // Click the input element
+            robot.mouseMove(dateInputElementFin.getLocation().getX(), dateInputElementFin.getLocation().getY()+170);
+            robot.mousePress(InputEvent.BUTTON1_MASK);
+            robot.mouseRelease(InputEvent.BUTTON1_MASK);
+
+            // Type the date
+            expectedDate = datosTestCase.get(18);
+            for (char c : expectedDate.toCharArray()) {
+              robot.keyPress(Character.toUpperCase(c));
+              robot.delay(50); // Adjust delay if needed
+              robot.keyRelease(Character.toUpperCase(c));
+            }
+
+            // Press Tab or Enter
+            robot.keyPress(KeyEvent.VK_TAB); // Or KeyEvent.VK_ENTER if needed
+            robot.delay(100); // Adjust delay if needed
+            robot.keyRelease(KeyEvent.VK_TAB); // Or KeyEvent.VK_ENTER if needed
+            
+            Thread.sleep(500);
+            System.out.println("Ingresó el fecha de inicio: " + datosTestCase.get(17));
+            Thread.sleep(500);
+            
+            javascriptExecutor.executeScript("document.querySelector(\"input[name='fechaFin']\").setAttribute('value', '" + datosTestCase.get(18) + "')");            
+            Thread.sleep(500);            
+            System.out.println("Ingresó el fecha de fin: " + datosTestCase.get(18));
+            Thread.sleep(500);
+            
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("demo-simple-select"))).click();
+            System.out.println("Click 'demo-simple-select'");
+            
+            String docente = datosTestCase.get(23);          
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[contains(text(),'" + docente + "')]"))).click();
+            System.out.println("Click 'Docente' " + docente);
+            Thread.sleep(500);
+            
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[contains(text(),'Registrar')]"))).click();
+            System.out.println("Click 'Registrar'");            
+           
+            Alert alert = webDriverWait.until(ExpectedConditions.alertIsPresent());
+            System.out.println("Alert: " + alert.getText());
+            
+            assertTrue(alert.getText().contains("200"));            
+            
+        	PrintMessage(sMethodName);
+            
+        } catch (Exception e) {
+            //e.printStackTrace();
+        	PrintError(sMethodName, e);        	
+        }
 	}
 	
 	
@@ -534,6 +677,11 @@ public class GestEduAutomation {
 	private void ClickBurgerMenu(WebDriverWait wait) {
 		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[contains(@aria-label, 'open drawer')]"))).click();
     	System.out.println("Clic en boton 'Burger Menu'");
+	}
+	
+	private void CloseBurgerMenu(WebDriverWait wait) {		
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/div/div[3]/div/button"))).click();
+        System.out.println("Clic en boton 'Cerrar menu'");
 	}
 	
 	private void PrintTestCase(String sMethodName) {
