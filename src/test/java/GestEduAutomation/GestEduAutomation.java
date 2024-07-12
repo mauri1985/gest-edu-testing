@@ -1,4 +1,5 @@
 package GestEduAutomation;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.awt.Robot;
@@ -159,6 +160,12 @@ public class GestEduAutomation {
                     break;
                 case "registrarEstudiante":
                 	registrarEstudiante();
+                    break;
+                case "inscripcionCarrera":
+                	inscripcionCarrera();
+                    break;
+                case "aprobarInscCarrera":
+                	aprobarInscCarrera();
                     break;
                 default:
                     System.out.println("Test case no reconocido: " + testCase);
@@ -836,12 +843,77 @@ public class GestEduAutomation {
 	
 	
 	public void inscripcionCarrera() {
-		
+		String sMethodName = new String (Thread.currentThread().getStackTrace()[1].getMethodName());
+	    
+        try {
+        	PrintTestCase(sMethodName);
+        	
+        	String carrera = datosTestCase.get(9);
+        	
+        	ClickBurgerMenu(webDriverWait);
+        	
+        	FindByLinktext("Inscripciones").click();
+        	
+        	FindByXpath("//button[contains(text(),'Otras carreras')]").click();
+        	
+        	FindByXpath("//div[contains(text(),'" + carrera + "')]/following-sibling::*/following-sibling::*/following-sibling::*/div/button").click();
+        	
+        	FindByXpath("//button[contains(text(),'Si')]").click();
+        	
+        	boolean isVisible = FindByXpath("//div[contains(text(),'Su inscripcion ha sido solicidada correctamente')]") != null;
+            
+            assertTrue("El mensaje 'Su inscripcion ha sido solicidada correctamente' no es visible", isVisible);
+        	
+        	PrintMessage(sMethodName);
+            
+        } catch (Exception e) {
+            //e.printStackTrace();
+        	PrintError(sMethodName, e);        	
+        }
 	}
 	
 	
 	public void aprobarInscCarrera() {
-		
+		String sMethodName = new String (Thread.currentThread().getStackTrace()[1].getMethodName());
+	    
+        try {
+        	PrintTestCase(sMethodName);
+        	
+        	String ci = datosTestCase.get(4);
+        	String carrera = datosTestCase.get(9);
+        	
+        	ClickBurgerMenu(webDriverWait);
+        	
+        	FindByLinktext("Inscripciones").click();
+        	
+            WebElement hoverable = FindByXpath("//div[contains(text(), 'Cedula')]");
+            new Actions(driver)
+                    .moveToElement(hoverable)
+                    .perform();
+                   
+    		FindByXpath("//div[contains(text(), 'Cedula')]/parent::div/parent::div/following-sibling::div/button").click();       
+          
+    		FindByXpath("//span[contains(text(),'Filter')]").click();
+    		
+    		FindByXpath("//label[contains(text(),'Value')]/following-sibling::div/input").sendKeys(ci);
+    		
+    		FindByXpath("//*[@title='" + carrera + "']/following-sibling::div/following-sibling::div/div/button[1]").click();
+    		
+    		boolean isVisible = false;
+			try {
+				isVisible = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@title='" + carrera + "']/following-sibling::div/following-sibling::div/div/button[1]"))) != null;
+			} catch (Exception e) {
+				//No hace nada
+			}	
+            
+            assertTrue("El mensaje 'Su inscripcion ha sido solicidada correctamente' no es visible", !isVisible);
+        	
+        	PrintMessage(sMethodName);
+            
+        } catch (Exception e) {
+            //e.printStackTrace();
+        	PrintError(sMethodName, e);        	
+        }
 	}
 	
 	
@@ -893,7 +965,7 @@ public class GestEduAutomation {
 		// Imprimir el mensaje en consola
 		System.out.println(message);
 		// Imprimir mensaje excepcion
-		//System.out.println(e.getMessage());
+		System.out.println(e.getMessage());
 	}
 	
 	public WebElement FindByXpath(String xpath) {
