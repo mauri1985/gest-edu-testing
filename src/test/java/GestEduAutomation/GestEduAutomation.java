@@ -154,6 +154,9 @@ public class GestEduAutomation {
                 case "altaCurso":
                 	altaCurso();
                     break;
+                case "altaExamen":
+                	altaExamen();
+                    break;
                 default:
                     System.out.println("Test case no reconocido: " + testCase);
                     break;
@@ -646,7 +649,133 @@ public class GestEduAutomation {
 	
 	
 	public void altaExamen() {
-		
+		String sMethodName = new String (Thread.currentThread().getStackTrace()[1].getMethodName());
+	    
+        try {
+        	PrintTestCase(sMethodName);
+        	
+        	webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(text(),'Funcionario')]")));            
+            System.out.println("Verificó la visibilidad del titulo 'Funcionario'");
+            
+            ClickBurgerMenu(webDriverWait);
+            
+            //BUSCA LA CARRERA
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText("Calendario"))).click();
+            System.out.println("Clic en enlance 'Calendario'");
+            
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(text(), 'Nombre')]")));  
+            System.out.println("Espera visibilidad columna 'Nombre'");
+                    
+            //Se mueve el mouse hasta el boton Menu de la columna nombre, para acceder al filtro.
+            WebElement hoverable = driver.findElement(By.xpath("//div[contains(text(), 'Nombre')]"));
+            Actions action = new Actions(driver);
+            action.moveToElement(hoverable).perform();       
+            Thread.sleep(1000);
+    		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(text(), 'Nombre')]/parent::div/parent::div/following-sibling::div/button"))).click();  
+            System.out.println("Click en menu columna 'Nombre'");            
+          
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[contains(text(),'Filter')]"))).click();  
+            System.out.println("Click en filter columna 'Nombre'");
+            
+            System.out.println("Carrera " + datosTestCase.get(9));            
+          
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\":r17:\"]"))).sendKeys(datosTestCase.get(9));
+            System.out.println("Ingresó el nombre de la carrera");            
+
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(text(),'" + datosTestCase.get(9) + "')]/following-sibling::div/following-sibling::div/following-sibling::div"))).click();  
+            System.out.println("Selecciona carrara " + datosTestCase.get(9));         
+
+            //BUSCA ASIGNATURA
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/main/section/div/div/div[2]/div/div[2]/div[1]/div[1]/div/div/div[3]")));  
+            System.out.println("Espera visibilidad columna 'Nombre'");
+                    
+            //Se mueve el mouse hasta el boton Menu de la columna nombre, para acceder al filtro.
+            WebElement hoverable2 = driver.findElement(By.xpath("/html/body/main/section/div/div/div[2]/div/div[2]/div[1]/div[1]/div/div/div[3]"));
+           
+            action = new Actions(driver);
+            action.moveToElement(hoverable2).perform();
+            System.out.println("Hover Nombre OK");            
+                        
+            driver.findElement(By.xpath("//div[contains(text(), 'Nombre')]/parent::*/parent::*/following-sibling::*/button")).click();
+    		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(text(), 'Nombre')]/parent::*/parent::*/following-sibling::*/button"))).click();  
+            System.out.println("Click en menu columna 'Nombre'");            
+          
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[contains(text(),'Filter')]"))).click();  
+            System.out.println("Click en filter columna 'Nombre'");
+          
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@placeholder='Filter value']"))).sendKeys(datosTestCase.get(11));
+            System.out.println("Ingresó el nombre de la asignatura");            
+			
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(text(),'" + datosTestCase.get(11) + "')]/following-sibling::div/following-sibling::div/following-sibling::div/following-sibling::div"))).click();  
+            System.out.println("Selecciona asignatura " + datosTestCase.get(9));        
+                        
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[contains(text(),'Registrar Fecha de Examen')]"))).click();
+            System.out.println("Click en boton 'Registrar Fecha de Examen'");
+            
+            Thread.sleep(500);
+             
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"demo-simple-select-label\"]/parent::*/parent::*")));
+            Thread.sleep(500);
+            WebElement sPeriodo = driver.findElement(By.xpath("//*[@id=\"demo-simple-select-label\"]/parent::*/parent::*"));
+            sPeriodo.click();
+            System.out.println("Click 'Periodo'");            
+            Thread.sleep(1000);
+            
+            String periodo = datosTestCase.get(24); 
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(text(),'" + periodo + "')]")));
+            WebElement inputPeriodo = driver.findElement(By.xpath("//*[contains(text(),'" + periodo +"')]"));
+            inputPeriodo.click();
+            System.out.println("Selecciona Periodo " + periodo);
+            Thread.sleep(500);
+            
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//label[contains(text(),'Fecha y Hora')]/following-sibling::*/input")));
+            WebElement inputFechaHora = driver.findElement(By.xpath("//label[contains(text(),'Fecha y Hora')]/following-sibling::*/input"));
+            Thread.sleep(500);
+            
+            String expectedDate = datosTestCase.get(25);
+            for (char c : expectedDate.toCharArray()) {
+            	inputFechaHora.sendKeys(String.valueOf(c));
+            }
+            inputFechaHora.sendKeys(Keys.TAB);
+            Thread.sleep(1000);
+            
+            String diasPrevios = datosTestCase.get(26);
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.name("diasPrevInsc")));
+            WebElement inputDiasPrev = driver.findElement(By.name("diasPrevInsc"));
+            inputDiasPrev.sendKeys(datosTestCase.get(26));
+            System.out.println("Se ingresa dias previos inscripcion: " + diasPrevios);
+            Thread.sleep(1000);       
+            
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("demo-multiple-checkbox")));
+            WebElement selectDocente = driver.findElement(By.id("demo-multiple-checkbox"));
+            selectDocente.click();
+            System.out.println("Click en select 'Docente'");
+            Thread.sleep(1000);
+            
+            String docente = datosTestCase.get(23); 
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(text(),'" + docente + "')]")));
+            WebElement selectOption = driver.findElement(By.xpath("//*[contains(text(),'" + docente +"')]"));
+            selectOption.click();
+            System.out.println("Selecciona docente: " + docente);
+            Thread.sleep(1000);     
+
+               
+            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[contains(text(),'Registrar')]")));
+            WebElement btnRegistrar = driver.findElement(By.xpath("//button[contains(text(),'Registrar')]"));
+            btnRegistrar.click();
+            System.out.println("Click en boton 'Registrar'");
+            
+            boolean isVisible = FindByXpath("//div[contains(text(),'Examen registrado con exito')]") != null;
+            System.out.println("Verificó la visibilidad boton 'Examen registrado con exito'");
+            
+            assertTrue("El enlace 'Examen registrado con exito' no es visible", isVisible);
+                        
+        	PrintMessage(sMethodName);
+            
+        } catch (Exception e) {
+            //e.printStackTrace();
+        	PrintError(sMethodName, e);        	
+        }
 	}
 	
 	
@@ -715,4 +844,42 @@ public class GestEduAutomation {
 		// Imprimir mensaje excepcion
 		System.out.println(e.getMessage());
 	}
+	
+	public WebElement FindByXpath(String xpath) {
+		try {
+			webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
+			WebElement element = driver.findElement(By.xpath(xpath));
+			System.out.println("Se busca por xpath: " + xpath);        
+			return element;
+		} catch (Exception e) {
+			PrintError("No se pudo encontrar elemento por xpath: " + xpath, e);
+		}
+		return null;
+	}
+	
+	public WebElement FindById(String id) {
+		try {
+			webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id(id)));
+			WebElement element = driver.findElement(By.id(id));
+			System.out.println("Se busca por id: " + id);        
+			return element;
+		} catch (Exception e) {
+			PrintError("No se pudo encontrar elemento por ID: " + id, e);
+		}
+		return null;
+	}
+	
+	public WebElement FindByName(String name) {
+		try {
+			webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.name(name)));
+			WebElement element = driver.findElement(By.name(name));
+			System.out.println("Se busca por Name: " + name);        
+			return element;
+		} catch (Exception e) {
+			PrintError("No se pudo encontrar elemento por Name: " + name, e);
+		}
+		return null;
+	}
+	
+	
 }
