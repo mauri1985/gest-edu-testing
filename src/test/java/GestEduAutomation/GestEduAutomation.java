@@ -157,6 +157,9 @@ public class GestEduAutomation {
                 case "altaExamen":
                 	altaExamen();
                     break;
+                case "registrarEstudiante":
+                	registrarEstudiante();
+                    break;
                 default:
                     System.out.println("Test case no reconocido: " + testCase);
                     break;
@@ -779,8 +782,56 @@ public class GestEduAutomation {
 	}
 	
 	
-	public void registarEstudiante() {
-		
+	public void registrarEstudiante() {
+		String sMethodName = new String (Thread.currentThread().getStackTrace()[1].getMethodName());
+	    
+        try {
+        	PrintTestCase(sMethodName);
+        	
+        	String nombre = datosTestCase.get(2);
+        	String apellido = datosTestCase.get(3);
+        	String email = datosTestCase.get(0);
+        	String ci = datosTestCase.get(4);
+        	String fechaNac = datosTestCase.get(5);
+        	String domicilio = datosTestCase.get(6);
+        	String telefono = datosTestCase.get(7);
+        	String password = datosTestCase.get(1);
+        	
+        	ClickBurgerMenu(webDriverWait);
+        	
+        	FindByLinktext("Registrarse").click();
+        	
+        	FindById("nombre").sendKeys(nombre);
+        	
+        	FindById("apellido").sendKeys(apellido);
+        	
+        	FindById("email").sendKeys(email);
+        	
+        	FindById("ci").sendKeys(ci);
+        	
+        	WebElement inputFechaNac = FindById("fechaNac");
+        	inputFechaNac.sendKeys(fechaNac);        	
+        	
+        	FindById("domicilio").sendKeys(domicilio);
+        	
+        	FindById("telefono").sendKeys(telefono);
+        	
+        	FindById("password").sendKeys(password);
+        	
+        	FindById("confirmPassword").sendKeys(password);
+        	
+        	FindByXpath("//button[contains(text(),'Registrarse')]").click();
+        	
+        	boolean isVisible = FindByXpath("//h1[contains(text(),'Iniciar sesión')]") != null;
+            
+            assertTrue("El titulo 'Iniciar sesión' no es visible", isVisible);
+        	
+        	PrintMessage(sMethodName);
+            
+        } catch (Exception e) {
+            //e.printStackTrace();
+        	PrintError(sMethodName, e);        	
+        }
 	}
 	
 	
@@ -842,7 +893,7 @@ public class GestEduAutomation {
 		// Imprimir el mensaje en consola
 		System.out.println(message);
 		// Imprimir mensaje excepcion
-		System.out.println(e.getMessage());
+		//System.out.println(e.getMessage());
 	}
 	
 	public WebElement FindByXpath(String xpath) {
@@ -861,7 +912,8 @@ public class GestEduAutomation {
 		try {
 			webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id(id)));
 			WebElement element = driver.findElement(By.id(id));
-			System.out.println("Se busca por id: " + id);        
+			System.out.println("Se busca por id: " + id);  
+			Thread.sleep(500);
 			return element;
 		} catch (Exception e) {
 			PrintError("No se pudo encontrar elemento por ID: " + id, e);
@@ -873,7 +925,8 @@ public class GestEduAutomation {
 		try {
 			webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.name(name)));
 			WebElement element = driver.findElement(By.name(name));
-			System.out.println("Se busca por Name: " + name);        
+			System.out.println("Se busca por Name: " + name);    
+			Thread.sleep(500);
 			return element;
 		} catch (Exception e) {
 			PrintError("No se pudo encontrar elemento por Name: " + name, e);
@@ -881,5 +934,17 @@ public class GestEduAutomation {
 		return null;
 	}
 	
+	public WebElement FindByLinktext(String linkText) {
+		try {
+			webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText(linkText)));
+			WebElement element = driver.findElement(By.linkText(linkText));
+			System.out.println("Se busca por linkText: " + linkText);       
+			Thread.sleep(500);
+			return element;
+		} catch (Exception e) {
+			PrintError("No se pudo encontrar elemento por linkText: " + linkText, e);
+		}
+		return null;
+	}
 	
 }
