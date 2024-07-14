@@ -1,17 +1,11 @@
 package GestEduAutomation;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
 import java.awt.Robot;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.junit.After;
@@ -23,6 +17,7 @@ import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -39,10 +34,13 @@ public class GestEduAutomation {
     //private static final String DRIVER_PATH = "./src/test/resources/chromedriver/chromedriver.exe";
 	private static final String DRIVER_PATH = "./src/test/resources/geckodriver/geckodriver.exe";
     private static final String PATH = "https://gestedu.works/";    
-    private static Map<String, Row> testCasesToRun;
+    private static List<Row> testCasesToRun;
     private static List<String> datosTestCase = new ArrayList<>();
     private static JavascriptExecutor javascriptExecutor;
     private static WebDriverWait webDriverWait;
+    private static String testCaseId;
+    private static String testCaseName;
+    private static int waitSeconds = 5;
     
     public static void initializeDriver() {
         if (driver == null) {
@@ -64,7 +62,7 @@ public class GestEduAutomation {
     }
     
     public static void initializeWait() {
-    	webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(5));
+    	webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(waitSeconds));
     }
     
     public static WebDriver getDriver() {
@@ -78,12 +76,12 @@ public class GestEduAutomation {
         }
     }    
     
-    public static List<String> getDatosTestCase(Row row) {
+    public static List<String> GetDatosTestCase(Row row) {
     	List<String> datos = new ArrayList<>();
     	for (int i = 2; i < row.getLastCellNum(); i++) {
     		Cell cell = row.getCell(i);
     		if (cell != null) {
-                // Realizar alguna operación con cada celda (por ejemplo, obtener su valor)
+
                 switch (cell.getCellType()) {
                     case STRING:
                     	datos.add(cell.getStringCellValue());
@@ -131,9 +129,12 @@ public class GestEduAutomation {
 	
 	@Test
     public void runTestCases() {		
-		for (Map.Entry<String, Row> testCase : testCasesToRun.entrySet())  {
-			datosTestCase = getDatosTestCase(testCase.getValue());
-            switch (testCase.getKey()) {
+
+		for (Row testCase : testCasesToRun)  {			
+			datosTestCase = GetDatosTestCase(testCase);
+			testCaseId = testCase.getCell(0).getStringCellValue();
+			testCaseName = testCase.getCell(1).getStringCellValue();
+            switch (testCaseName) {
                 case "login":
                     login();
                     break;
@@ -167,272 +168,194 @@ public class GestEduAutomation {
                 case "aprobarInscCarrera":
                 	aprobarInscCarrera();
                     break;
+                case "altaPreviatura":
+                	altaPreviatura();
+                    break;
+                case "inscripcionCurso":
+                	inscripcionCurso();
+                    break;
                 default:
-                    System.out.println("Test case no reconocido: " + testCase);
+                	if(testCaseName != "")
+                	PrintError("Test case no reconocido: " + testCaseName, null);
                     break;
             }
         }
     }
 
-	
-	public void login() {
-		
-		//Se obtiene el nombre del metodo
-	    String sMethodName = new String (Thread.currentThread().getStackTrace()[1].getMethodName());
-	    
+
+	public void login() {		    
         try {
-        	PrintTestCase(sMethodName);
+        	
+        	String rolUsuario = datosTestCase.get(27);
+        	
+        	PrintTestCase(testCaseName);
         	
         	ClickBurgerMenu(webDriverWait);
         	
-            // Esperar hasta que el enlace "Ingresar" sea visible y hacer clic en él
-        	webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText("Iniciar Sesión"))).click();
-            System.out.println("Clic en enlance 'Iniciar sesion'");
+        	FindByLinktext("Iniciar Sesión").click();
 
-            // Esperar hasta que el campo de email sea visible y escribir en él
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("email"))).sendKeys(datosTestCase.get(0));
-            System.out.println("Ingresó el email");
+            FindById("email").sendKeys(datosTestCase.get(0));
+            
+            FindById("password").sendKeys(datosTestCase.get(1));
 
-            // Esperar hasta que el campo de contraseña sea visible y escribir en él
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password"))).sendKeys(datosTestCase.get(1));
-            System.out.println("Ingresó la contraseña");
-
-            // Esperar hasta que el botón "btn-primary" sea visible y hacer clic en él
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.className("btn-primary"))).click();
-            System.out.println("Hizo clic en el botón de inicio de sesión");
-
-            ClickBurgerMenu(webDriverWait);
+            FindByXpath("//button[contains(text(),'Ingresar')]").click();            
             
-            // Esperar hasta que el enlace "Salir" sea visible
-            boolean isVisible = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[contains(text(),'Salir')]"))) != null;
-            System.out.println("Verificó la visibilidad del enlace 'Salir'");
+            WaitVisibility(By.xpath("//h1[contains(text(), '" + rolUsuario.trim() + "')]"));
             
-            CloseBurgerMenu(webDriverWait);
-            
-            assertTrue("El enlace 'Salir' no es visible", isVisible);
-            
-            PrintMessage(sMethodName);
+            PrintSuccesMessage(testCaseName);
             
         } catch (Exception e) {
             //e.printStackTrace();
-        	PrintError(sMethodName, e);        	
+        	PrintFailMessage(testCaseId, testCaseName, e);     
         }
 	}
 	
 
-	public void logout() {
-		
-		
-		//Se obtiene el nombre del metodo
-	    String sMethodName = new String (Thread.currentThread().getStackTrace()[1].getMethodName());
-	    
+	public void logout() {	    
 		try {
-			PrintTestCase(sMethodName);
+			PrintTestCase(testCaseName);
 			
 			ClickBurgerMenu(webDriverWait);
         	
-			webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[contains(text(),'Salir')]"))).click();
-	        System.out.println("Hizo clic en 'Salir'");
+			FindByXpath("//span[contains(text(),'Salir')]").click();
+			
+			CloseBurgerMenu(webDriverWait);
 	        
-	        assertTrue(true);			
-	        PrintMessage(sMethodName);
+	        WaitVisibility(By.xpath("//*[contains(text(),'Administrador de gestión educativa')]"));
+	        			
+	        PrintSuccesMessage(testCaseName);
 		} catch (Exception e) {
-            PrintError(sMethodName, e);            
+            PrintFailMessage(testCaseId, testCaseName, e);                 
         }
 	}	
 	
-	public void agregarUsuario() {
-		
-		//Se obtiene el nombre del metodo
-	    String sMethodName = new String (Thread.currentThread().getStackTrace()[1].getMethodName());
-	    
+
+	public void agregarUsuario() {	    
         try {
-        	PrintTestCase(sMethodName);
+        	PrintTestCase(testCaseName);
         	
         	ClickBurgerMenu(webDriverWait);
         	
-            //Ir a usuarios
-        	webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[contains(text(),'Usuarios')]"))).click();            
-            System.out.println("Verificó la visibilidad del enlace 'Usuarios'");
+            FindByLinktext("Usuarios").click();
             
-            //Espera a entrar a la pagina
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(text(),'Usuarios')]"))).click();            
-            System.out.println("Verificó la visibilidad del titulo 'Usuarios'");
+            FindByXpath("//h1[contains(text(),'Usuarios')]").click();
             
-    		//Click en agregar usuario
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[text()='Agregar usuario']"))).click();            
-            System.out.println("Verificó la visibilidad del boton 'Agregar usuarios'");
+    		FindByXpath("//button[text()='Agregar usuario']").click();
     		
-    		//Cargar datos
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nombre"))).sendKeys(datosTestCase.get(2));
-            System.out.println("Ingresó el nombre");
-            
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("apellido"))).sendKeys(datosTestCase.get(3));
-            System.out.println("Ingresó el apellido");
-            
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("email"))).sendKeys(datosTestCase.get(0));
-            System.out.println("Ingresó el email");
-            
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("ci"))).sendKeys(datosTestCase.get(4));
-            System.out.println("Ingresó el ci");
-
-            javascriptExecutor.executeScript("document.querySelector(\"input[id='fechaNac']\").setAttribute('value', '" + datosTestCase.get(5) + "')");
-            System.out.println("Ingresó el fecha nacimiento");
-            
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("domicilio"))).sendKeys(datosTestCase.get(6));
-            System.out.println("Ingresó el domicilio");
-            
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("telefono"))).sendKeys(datosTestCase.get(7));
-            System.out.println("Ingresó el telefono");
-            
-            Select drpTipoUsuario = new Select(driver.findElement(By.name("tipoUsuario")));
+    		FindById("nombre").sendKeys(datosTestCase.get(2));
+    		
+    		FindById("apellido").sendKeys(datosTestCase.get(3));
+    		
+    		FindById("email").sendKeys(datosTestCase.get(0));
+    		
+    		FindById("ci").sendKeys(datosTestCase.get(4));
+    		
+    		FindById("fechaNac").sendKeys(datosTestCase.get(5));
+    		
+    		FindById("domicilio").sendKeys(datosTestCase.get(6));
+    		
+    		FindById("telefono").sendKeys(datosTestCase.get(7));
+    		
+            Select drpTipoUsuario = new Select(FindByName("tipoUsuario"));
             drpTipoUsuario.selectByVisibleText(datosTestCase.get(8));
-            System.out.println("Ingresó el tipo de usuario");
             
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password"))).sendKeys(datosTestCase.get(1));
-            System.out.println("Ingresó el contraseña");
+            FindById("password").sendKeys(datosTestCase.get(1));
             
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("confirmPassword"))).sendKeys(datosTestCase.get(1));
-            System.out.println("Ingresó el confirmar contraseña");            
+            FindById("confirmPassword").sendKeys(datosTestCase.get(1));            
+    
+            FindByXpath("//button[text()='Agregar']").click();
             
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[text()='Agregar']"))).click();            
-            System.out.println("Verificó la visibilidad del boton 'Agregar'");            
-          
-            //Esperar hasta que el enlace "Salir" sea visible
-            boolean isVisible = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[text()='Agregar usuario']"))) != null;
-            System.out.println("Verificó la visibilidad del enlace 'Agregar usuario'");
-
-            assertTrue("El enlace 'Agregar usuario' no es visible", isVisible);
+            WaitVisibility(By.xpath(testCaseName));
             
-            
-            PrintMessage(sMethodName);
+            PrintSuccesMessage(testCaseName);
             
         } catch (Exception e) {
             //e.printStackTrace();
-        	PrintError(sMethodName, e);        	
+        	PrintFailMessage(testCaseId, testCaseName, e);        	
         }
 		
 	}
 
 	
-	@SuppressWarnings("deprecation")
-	public void altaCarrera() {
-	    String sMethodName = new String (Thread.currentThread().getStackTrace()[1].getMethodName());
+	public void altaCarrera() {	    
 	    
         try {
-        	PrintTestCase(sMethodName);
+        	PrintTestCase(testCaseName);
         	
-        	webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(text(),'Coordinador')]")));            
-            System.out.println("Verificó la visibilidad del titulo 'Coordinador'");
-            
             ClickBurgerMenu(webDriverWait);
             
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText("Carreras"))).click();
-            System.out.println("Clic en enlance 'Carreras'");
+            FindByLinktext("Carreras").click();            
             
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//p[contains(text(),'1–')]")));            
-            System.out.println("Verificó la visibilidad de la 'Tabla'");
+            WaitVisibility(By.xpath("//p[contains(text(),'1–')]"));     
             
-            WebElement btnAgregarCarreras = driver.findElement(By.xpath("//button[contains(text(),'Agregar Carrera')]"));
-            btnAgregarCarreras.click();
-            System.out.println("Verificó la visibilidad del boton 'Agregar carrera'");             
+            FindByXpath("//button[contains(text(),'Agregar Carrera')]").click();          
           
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//input[@id=\"nombre\"]"))).sendKeys(datosTestCase.get(9));            
-            System.out.println("Verificó la visibilidad input Nombre");
+            FindByXpath("//input[@id='nombre']").sendKeys(datosTestCase.get(9));
             
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//textarea[@id='descripcion']"))).sendKeys(datosTestCase.get(10));             
-            System.out.println("Verificó la visibilidad input Descripcion");
+            FindByXpath("//textarea[@id='descripcion']").sendKeys(datosTestCase.get(10));             
             
-            WebElement btnAgregar = driver.findElement(By.xpath("//button[contains(text(),'Agregar')]"));
-            btnAgregar.click();
-            System.out.println("Se hace clic en 'Agregar'");
+            FindByXpath("//button[contains(text(),'Agregar')]").click();
             
-            boolean isVisible = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[contains(text(),'Agregar Carrera')]"))) != null;
-            System.out.println("Verificó la visibilidad boton 'Agregar carreras'");
+            WaitVisibility(By.xpath("//button[contains(text(),'Agregar Carrera')]"));
             
-            assertTrue("El enlace 'Agregar carrera' no es visible", isVisible);
-            
-        	PrintMessage(sMethodName);
+        	PrintSuccesMessage(testCaseName);
             
         } catch (Exception e) {
             //e.printStackTrace();
-        	PrintError(sMethodName, e);        	
+        	PrintFailMessage(testCaseId, testCaseName, e);             	
         }
 		
 	}
 	
 	
 	public void altaAsignatura() {
-		String sMethodName = new String (Thread.currentThread().getStackTrace()[1].getMethodName());
-	    
         try {
-        	PrintTestCase(sMethodName);
-        	
-        	webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(text(),'Coordinador')]")));            
-            System.out.println("Verificó la visibilidad del titulo 'Coordinador'");
+        	PrintTestCase(testCaseName);
             
             ClickBurgerMenu(webDriverWait);
             
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText("Carreras"))).click();
-            System.out.println("Clic en enlance 'Carreras'");
-            
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(text(), 'Nombre')]")));  
-            System.out.println("Espera visibilidad columna 'Nombre'");
+            FindByLinktext("Carreras").click();
                     
-            WebElement hoverable = driver.findElement(By.xpath("//div[contains(text(), 'Nombre')]"));
+            WebElement hoverable = FindByXpath("//div[contains(text(), 'Nombre')]");
             new Actions(driver)
                     .moveToElement(hoverable)
-                    .perform();
-       
+                    .perform();       
             
-    		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(text(), 'Nombre')]/parent::div/parent::div/following-sibling::div/button"))).click();  
-            System.out.println("Click en menu columna 'Nombre'");            
+    		FindByXpath("//div[contains(text(), 'Nombre')]/parent::div/parent::div/following-sibling::div/button").click();  
           
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[contains(text(),'Filter')]"))).click();  
-            System.out.println("Click en filter columna 'Nombre'");            
+            FindByXpath("//span[contains(text(),'Filter')]").click();          
           
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\":r1e:\"]"))).sendKeys(datosTestCase.get(9));
-            System.out.println("Ingresó el nombre de la carrera");
-            
+            FindByXpath("//input[@placeholder='Filter value']").sendKeys(datosTestCase.get(11));            
 
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(text(),'" + datosTestCase.get(9) + "')]/following-sibling::div/following-sibling::div/following-sibling::div"))).click();  
-            System.out.println("Selecciona carrara " + datosTestCase.get(9));         
+            FindByXpath("//div[contains(text(),'" + datosTestCase.get(9) + "')]/following-sibling::div/following-sibling::div/following-sibling::div").click();
 
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[contains(text(),'Agregar asignatura')]"))).click();
-            System.out.println("Verificó la visibilidad boton 'Agregar asignatura'");
+            FindByXpath("//button[contains(text(),'Agregar asignatura')]").click();
             
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nombre"))).sendKeys(datosTestCase.get(11));
-            System.out.println("Ingresó el email");
+            FindById("nombre").sendKeys(datosTestCase.get(11));
             
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("descripcion"))).sendKeys(datosTestCase.get(12));
-            System.out.println("Ingresó el email");
+            FindById("descripcion").sendKeys(datosTestCase.get(12));
             
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("creditos"))).sendKeys(datosTestCase.get(15));
-            System.out.println("Ingresó el email");
+            FindById("creditos").sendKeys(datosTestCase.get(15));
             
-            webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[contains(text(),'Agregar')]"))).click();
-            System.out.println("Verificó la visibilidad boton 'Agregar'");            
+            FindByXpath("//button[contains(text(),'Agregar')]").click();            
             
-            boolean isVisible = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[contains(text(), 'Agregar asignatura')]"))) != null;
-            System.out.println("Verificó la visibilidad boton 'Agregar asignatura'");
+            WaitVisibility(By.xpath("//button[contains(text(), 'Agregar asignatura')]"));
             
-            assertTrue("El enlace 'Agregar asignatura' no es visible", isVisible);
-            
-        	PrintMessage(sMethodName);
+        	PrintSuccesMessage(testCaseName);
             
         } catch (Exception e) {
             //e.printStackTrace();
-        	PrintError(sMethodName, e);        	
+        	PrintFailMessage(testCaseId, testCaseName, e);             	
         }
 		
 	}
 	
 	
 	public void agregarPlanEstudio() {
-		String sMethodName = new String (Thread.currentThread().getStackTrace()[1].getMethodName());
+		
 	    
         try {
-        	PrintTestCase(sMethodName);
+        	PrintTestCase(testCaseName);
         	
         	webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(text(),'Coordinador')]")));            
             System.out.println("Verificó la visibilidad del titulo 'Coordinador'");
@@ -466,7 +389,7 @@ public class GestEduAutomation {
             webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[contains(text(),'Registrar Plan de estudio')]"))).click();
             System.out.println("Click en boton 'Registrar Plan de estudio'");
             
-            Thread.sleep(1500);
+            //Thread.sleep(timing);
 
             String[] planDeEstudio = datosTestCase.get(16).split(";");  
             for (String plan : planDeEstudio) {
@@ -483,17 +406,17 @@ public class GestEduAutomation {
             	webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[contains(text(),'" + asignatura + "')]/following-sibling::div/following-sibling::div/following-sibling::div/div/input")));
             	WebElement inputSemestre = driver.findElement(By.xpath("//div[contains(text(),'" + asignatura + "')]/following-sibling::div/following-sibling::div/following-sibling::div/div/input"));
             	
-            	Thread.sleep(500);
+            	//Thread.sleep(timing);
             	inputSemestre.clear();
-            	Thread.sleep(500);
+            	//Thread.sleep(timing);
             	
             	inputSemestre.sendKeys(semestre);
             	System.out.println("Se ingresa semestre: " + semestre);
-            	Thread.sleep(500);
+            	//Thread.sleep(timing);
             	
             	inputSemestre.sendKeys(Keys.ENTER);
             	System.out.println("Se presionta tecla Enter");
-            	Thread.sleep(500);
+            	//Thread.sleep(timing);
             }                       
    
             driver.findElement(By.xpath("//button[contains(text(),'Agregar Plan de Estudio')]")).click();
@@ -504,21 +427,21 @@ public class GestEduAutomation {
             
             assertTrue("El enlace 'Ver Plan de estudio' no es visible", isVisible);
             
-        	PrintMessage(sMethodName);
+        	PrintSuccesMessage(testCaseName);
             
         } catch (Exception e) {
             //e.printStackTrace();
-        	PrintError(sMethodName, e);        	
+        	PrintFailMessage(testCaseId, testCaseName, e);             	
         }
 	}
 	
 	
 	@SuppressWarnings("deprecation")
 	public void altaCurso() {
-		String sMethodName = new String (Thread.currentThread().getStackTrace()[1].getMethodName());
+		
 	    
         try {
-        	PrintTestCase(sMethodName);
+        	PrintTestCase(testCaseName);
         	
         	webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(text(),'Funcionario')]")));            
             System.out.println("Verificó la visibilidad del titulo 'Funcionario'");
@@ -624,14 +547,14 @@ public class GestEduAutomation {
             robot.delay(100); // Adjust delay if needed
             robot.keyRelease(KeyEvent.VK_TAB); // Or KeyEvent.VK_ENTER if needed
             
-            Thread.sleep(500);
+            //Thread.sleep(timing);
             System.out.println("Ingresó el fecha de inicio: " + datosTestCase.get(17));
-            Thread.sleep(500);
+            //Thread.sleep(timing);
             
             javascriptExecutor.executeScript("document.querySelector(\"input[name='fechaFin']\").setAttribute('value', '" + datosTestCase.get(18) + "')");            
-            Thread.sleep(500);            
+            //Thread.sleep(timing);            
             System.out.println("Ingresó el fecha de fin: " + datosTestCase.get(18));
-            Thread.sleep(500);
+            //Thread.sleep(timing);
             
             webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("demo-simple-select"))).click();
             System.out.println("Click 'demo-simple-select'");
@@ -639,7 +562,7 @@ public class GestEduAutomation {
             String docente = datosTestCase.get(23);          
             webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[contains(text(),'" + docente + "')]"))).click();
             System.out.println("Click 'Docente' " + docente);
-            Thread.sleep(500);
+            //Thread.sleep(timing);
             
             webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[contains(text(),'Registrar')]"))).click();
             System.out.println("Click 'Registrar'");            
@@ -649,20 +572,20 @@ public class GestEduAutomation {
             
             assertTrue(alert.getText().contains("200"));            
             
-        	PrintMessage(sMethodName);
+        	PrintSuccesMessage(testCaseName);
             
         } catch (Exception e) {
             //e.printStackTrace();
-        	PrintError(sMethodName, e);        	
+        	PrintFailMessage(testCaseId, testCaseName, e);             	
         }
 	}
 	
 	
 	public void altaExamen() {
-		String sMethodName = new String (Thread.currentThread().getStackTrace()[1].getMethodName());
+		
 	    
         try {
-        	PrintTestCase(sMethodName);
+        	PrintTestCase(testCaseName);
         	
         	webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h1[contains(text(),'Funcionario')]")));            
             System.out.println("Verificó la visibilidad del titulo 'Funcionario'");
@@ -722,10 +645,10 @@ public class GestEduAutomation {
             webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[contains(text(),'Registrar Fecha de Examen')]"))).click();
             System.out.println("Click en boton 'Registrar Fecha de Examen'");
             
-            Thread.sleep(500);
+            //Thread.sleep(timing);
              
             webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"demo-simple-select-label\"]/parent::*/parent::*")));
-            Thread.sleep(500);
+            //Thread.sleep(timing);
             WebElement sPeriodo = driver.findElement(By.xpath("//*[@id=\"demo-simple-select-label\"]/parent::*/parent::*"));
             sPeriodo.click();
             System.out.println("Click 'Periodo'");            
@@ -736,11 +659,11 @@ public class GestEduAutomation {
             WebElement inputPeriodo = driver.findElement(By.xpath("//*[contains(text(),'" + periodo +"')]"));
             inputPeriodo.click();
             System.out.println("Selecciona Periodo " + periodo);
-            Thread.sleep(500);
+            //Thread.sleep(timing);
             
             webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//label[contains(text(),'Fecha y Hora')]/following-sibling::*/input")));
             WebElement inputFechaHora = driver.findElement(By.xpath("//label[contains(text(),'Fecha y Hora')]/following-sibling::*/input"));
-            Thread.sleep(500);
+            //Thread.sleep(timing);
             
             String expectedDate = datosTestCase.get(25);
             for (char c : expectedDate.toCharArray()) {
@@ -780,20 +703,20 @@ public class GestEduAutomation {
             
             assertTrue("El enlace 'Examen registrado con exito' no es visible", isVisible);
                         
-        	PrintMessage(sMethodName);
+        	PrintSuccesMessage(testCaseName);
             
         } catch (Exception e) {
             //e.printStackTrace();
-        	PrintError(sMethodName, e);        	
+        	PrintFailMessage(testCaseId, testCaseName, e);             	
         }
 	}
 	
 	
 	public void registrarEstudiante() {
-		String sMethodName = new String (Thread.currentThread().getStackTrace()[1].getMethodName());
+		
 	    
         try {
-        	PrintTestCase(sMethodName);
+        	PrintTestCase(testCaseName);
         	
         	String nombre = datosTestCase.get(2);
         	String apellido = datosTestCase.get(3);
@@ -833,20 +756,20 @@ public class GestEduAutomation {
             
             assertTrue("El titulo 'Iniciar sesión' no es visible", isVisible);
         	
-        	PrintMessage(sMethodName);
+        	PrintSuccesMessage(testCaseName);
             
         } catch (Exception e) {
             //e.printStackTrace();
-        	PrintError(sMethodName, e);        	
+        	PrintFailMessage(testCaseId, testCaseName, e);             	
         }
 	}
 	
 	
 	public void inscripcionCarrera() {
-		String sMethodName = new String (Thread.currentThread().getStackTrace()[1].getMethodName());
+		
 	    
         try {
-        	PrintTestCase(sMethodName);
+        	PrintTestCase(testCaseName);
         	
         	String carrera = datosTestCase.get(9);
         	
@@ -864,20 +787,20 @@ public class GestEduAutomation {
             
             assertTrue("El mensaje 'Su inscripcion ha sido solicidada correctamente' no es visible", isVisible);
         	
-        	PrintMessage(sMethodName);
+        	PrintSuccesMessage(testCaseName);
             
         } catch (Exception e) {
             //e.printStackTrace();
-        	PrintError(sMethodName, e);        	
+        	PrintFailMessage(testCaseId, testCaseName, e);             	
         }
 	}
 	
 	
 	public void aprobarInscCarrera() {
-		String sMethodName = new String (Thread.currentThread().getStackTrace()[1].getMethodName());
+		
 	    
         try {
-        	PrintTestCase(sMethodName);
+        	PrintTestCase(testCaseName);
         	
         	String ci = datosTestCase.get(4);
         	String carrera = datosTestCase.get(9);
@@ -908,22 +831,22 @@ public class GestEduAutomation {
             
             assertTrue("El mensaje 'Su inscripcion ha sido solicidada correctamente' no es visible", !isVisible);
         	
-        	PrintMessage(sMethodName);
+        	PrintSuccesMessage(testCaseName);
             
         } catch (Exception e) {
             //e.printStackTrace();
-        	PrintError(sMethodName, e);        	
+        	PrintFailMessage(testCaseId, testCaseName, e);             	
         }
 	}
 	
 	
 	public void altaPreviatura() {
-		
+		PrintMessage("No implementado");
 	}
 	
 	
 	public void inscripcionCurso() {
-		
+		PrintMessage("No implementado");
 	}
 	
 	private void ClickBurgerMenu(WebDriverWait wait) {
@@ -936,74 +859,85 @@ public class GestEduAutomation {
         System.out.println("Clic en boton 'Cerrar menu'");
 	}
 	
-	private void PrintTestCase(String sMethodName) {
+	private void PrintTestCase(String testCaseName) {
 		// Secuencia de escape ANSI para texto en negrita
 		String bold = "\u001B[1m";
 		// Secuencia de escape ANSI para reiniciar el formato de color
 		String reset = "\u001B[0m";
-		System.out.println(bold + "TESTCASE: " + sMethodName.toUpperCase() + reset);
+		System.out.println(bold + "############# TESTCASE: " + testCaseName.toUpperCase() +" #############" + reset);
+	}
+	
+	private void PrintMessage(String message) {
+		System.out.println(message);
 	}
 
-	private void PrintMessage(String sMethodName) {
+	private void PrintSuccesMessage(String testCaseName) {
 		// Secuencia de escape ANSI para establecer el color de fondo en verde
         String greenBackground = "\u001B[42m";
         // Secuencia de escape ANSI para reiniciar el formato de color
         String reset = "\u001B[0m";
         // Mensaje a imprimir con fondo verde
-        String message = greenBackground +  sMethodName.toUpperCase() + " - OK" + reset;
+        String message = greenBackground +  testCaseName.toUpperCase() + " - OK" + reset;
         // Imprimir el mensaje en consola
         System.out.println(message);
 	}
-
-	public void PrintError(String sMethodName, Exception e) {
+	
+	public void PrintFailMessage(String id, String testCase, Exception e) {
 		// Secuencia de escape ANSI para establecer el color de fondo en rojo
 		String redBackground = "\u001B[41m";
 		// Secuencia de escape ANSI para reiniciar el formato de color
 		String reset = "\u001B[0m";
 		// Mensaje a imprimir con fondo rojo
-		String message = redBackground + sMethodName.toUpperCase() + " - ERROR" + reset;
+		String message = redBackground + "TESTCASE FAIL - ID: " + id.toUpperCase() + " - " + testCase.toUpperCase() + reset;
 		// Imprimir el mensaje en consola
 		System.out.println(message);
-		// Imprimir mensaje excepcion
-		System.out.println(e.getMessage());
+	}
+
+	public void PrintError(String message, Exception e) {
+		// Código ANSI para el color rojo
+	    final String ANSI_RED = "\u001B[31m";
+	    // Código ANSI para restablecer el color
+	    final String ANSI_RESET = "\u001B[0m";
+	    // Imprimir el mensaje en rojo
+	    System.out.println(ANSI_RED + message + ANSI_RESET);
+	    // Imprimir excepcion en rojo
+	    //System.out.println(e.getMessage() + ANSI_RESET);
 	}
 	
 	public WebElement FindByXpath(String xpath) {
 		try {
+			System.out.println("Se busca por xpath: " + xpath);        
 			webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
 			WebElement element = driver.findElement(By.xpath(xpath));
-			System.out.println("Se busca por xpath: " + xpath);        
 			return element;
 		} catch (Exception e) {
 			PrintError("No se pudo encontrar elemento por xpath: " + xpath, e);
-		}
-		return null;
+			return null;
+		}		
 	}
 	
 	public WebElement FindById(String id) {
 		try {
+			System.out.println("Se busca por id: " + id);  
 			webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id(id)));
 			WebElement element = driver.findElement(By.id(id));
-			System.out.println("Se busca por id: " + id);  
-			Thread.sleep(500);
 			return element;
-		} catch (Exception e) {
+		} catch (NoSuchElementException e) {
 			PrintError("No se pudo encontrar elemento por ID: " + id, e);
-		}
-		return null;
+			return null;
+		}		
 	}
 	
 	public WebElement FindByName(String name) {
 		try {
+			System.out.println("Se busca por Name: " + name);   
 			webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.name(name)));
 			WebElement element = driver.findElement(By.name(name));
-			System.out.println("Se busca por Name: " + name);    
-			Thread.sleep(500);
 			return element;
-		} catch (Exception e) {
+		} catch (NoSuchElementException e) {
 			PrintError("No se pudo encontrar elemento por Name: " + name, e);
-		}
-		return null;
+			return null;
+		}		
 	}
 	
 	public WebElement FindByLinktext(String linkText) {
@@ -1011,12 +945,15 @@ public class GestEduAutomation {
 			webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.linkText(linkText)));
 			WebElement element = driver.findElement(By.linkText(linkText));
 			System.out.println("Se busca por linkText: " + linkText);       
-			Thread.sleep(500);
 			return element;
-		} catch (Exception e) {
+		} catch (NoSuchElementException e) {
 			PrintError("No se pudo encontrar elemento por linkText: " + linkText, e);
-		}
-		return null;
+			return null;
+		}		
+	}
+	
+	public boolean WaitVisibility(By by) {
+		return webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(by)) != null;
 	}
 	
 }
