@@ -490,6 +490,9 @@ public class GestEduAutomation {
 	    
         try {
         	String diasPrevios = datosTestCase.get(26);
+        	String periodo = datosTestCase.get(24);
+        	String nombreCarrera = datosTestCase.get(9); 
+        	String docente = datosTestCase.get(23); 
         	
         	PrintTestCase(testCaseName);
         	
@@ -511,22 +514,15 @@ public class GestEduAutomation {
             action.moveToElement(hoverable).perform();       
             
     		FindByXpath("//div[contains(text(), 'Nombre')]/parent::div/parent::div/following-sibling::div/button").click();  
-            System.out.println("Click en menu columna 'Nombre'");            
           
-            FindByXpath("//span[contains(text(),'Filtrar')]").click();  
-            System.out.println("Click en Filtrar columna 'Nombre'");
-            
-            System.out.println("Carrera " + datosTestCase.get(9));            
+            FindByXpath("//span[contains(text(),'Filtrar')]").click();                        
           
-            FindByXpath("//*[@id=\":r17:\"]").sendKeys(datosTestCase.get(9));
-            System.out.println("Ingresó el nombre de la carrera");            
+            FindByXpath("//*[@id=\":r17:\"]").sendKeys(nombreCarrera);
 
-            FindByXpath("//div[contains(text(),'" + datosTestCase.get(9) + "')]/following-sibling::div/following-sibling::div/following-sibling::div").click();  
-            System.out.println("Selecciona carrara " + datosTestCase.get(9));         
+            FindByXpath("//div[contains(text(),'" + nombreCarrera + "')]/following-sibling::div/following-sibling::div/following-sibling::div").click();  
 
             //BUSCA ASIGNATURA
             FindByXpath("/html/body/main/section/div/div/div[2]/div/div[2]/div[1]/div[1]/div/div/div[3]");  
-            System.out.println("Espera visibilidad columna 'Nombre'");
                     
             //Se mueve el mouse hasta el boton Menu de la columna nombre, para acceder al filtro.
             WebElement hoverable2 = FindByXpath("/html/body/main/section/div/div/div[2]/div/div[2]/div[1]/div[1]/div/div/div[3]");
@@ -535,38 +531,21 @@ public class GestEduAutomation {
             action.moveToElement(hoverable2).perform();      
                         
             FindByXpath("//div[contains(text(), 'Nombre')]/parent::*/parent::*/following-sibling::*/button").click();
-    		FindByXpath("//div[contains(text(), 'Nombre')]/parent::*/parent::*/following-sibling::*/button").click();  
-            System.out.println("Click en menu columna 'Nombre'");            
           
             FindByXpath("//span[contains(text(),'Filtrar')]").click();  
-            System.out.println("Click en Filtrar columna 'Nombre'");
           
             FindByXpath("//input[@placeholder='Filter value']").sendKeys(datosTestCase.get(11));
-            System.out.println("Ingresó el nombre de la asignatura");            
 			
             FindByXpath("//div[contains(text(),'" + datosTestCase.get(11) + "')]/following-sibling::div/following-sibling::div/following-sibling::div/following-sibling::div").click();  
-            System.out.println("Selecciona asignatura " + datosTestCase.get(9));        
                         
             FindByXpath("//button[contains(text(),'Registrar Fecha de Examen')]").click();
-            System.out.println("Click en boton 'Registrar Fecha de Examen'");        
-             
-            FindByXpath("//*[@id=\"demo-simple-select-label\"]/parent::*/parent::*");
-       
             
-            WebElement hoverable3 = FindByXpath("//*[@id='demo-simple-select-label']/parent::*/parent::*");
-            new Actions(driver)
-                    .moveToElement(hoverable3)
-                    .click()
-                    .perform();
+            Thread.sleep(1000);
+            FindByXpath("//*[contains(@id,'demo-simple-select-label')]/parent::*").click();
             Thread.sleep(1000);
             
-            String periodo = datosTestCase.get(24); 
-            FindByXpath("//*[contains(text(),'" + periodo + "')]");
-            WebElement inputPeriodo = FindByXpath("//*[contains(text(),'" + periodo +"')]");
-            inputPeriodo.click();
-            System.out.println("Selecciona Periodo " + periodo);
+            FindByXpath("//*[contains(text(),'" + periodo +"')]").click();
             
-            FindByXpath("//label[contains(text(),'Fecha y Hora')]/following-sibling::*/input");
             WebElement inputFechaHora = FindByXpath("//label[contains(text(),'Fecha y Hora')]/following-sibling::*/input");
             
             String expectedDate = datosTestCase.get(25);
@@ -578,21 +557,18 @@ public class GestEduAutomation {
             
             FindByName("diasPrevInsc").sendKeys(diasPrevios);
             
-            FindById("demo-multiple-checkbox");
             WebElement selectDocente = FindById("demo-multiple-checkbox");
-            selectDocente.click();
-            System.out.println("Click en select 'Docente'");
+            selectDocente.click();            
+            Thread.sleep(1000);
             
-            String docente = datosTestCase.get(23); 
-            FindByXpath("//*[contains(text(),'" + docente + "')]");
-            WebElement selectOption = FindByXpath("//*[contains(text(),'" + docente +"')]");
-            selectOption.click();
-               
-            FindByXpath("//button[contains(text(),'Registrar')]");
-            WebElement btnRegistrar = FindByXpath("//button[contains(text(),'Registrar')]");
-            btnRegistrar.click();
+            FindByXpath("//*[contains(text(),'" + docente + "')]").click();
             
-            Thread.sleep(5000);
+            selectDocente.sendKeys(Keys.ESCAPE);
+            Thread.sleep(1000);
+            
+            FindByXpath("//button[contains(text(),'Registrar')]").click();            
+            Thread.sleep(1000);
+            
             WaitVisibility(By.xpath("//div[contains(text(),'Examen registrado con exito')]"));
             
             PrintSuccesMessage(testCaseName);
