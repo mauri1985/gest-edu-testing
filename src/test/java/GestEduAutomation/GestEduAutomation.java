@@ -220,8 +220,8 @@ public class GestEduAutomation {
 			Thread.sleep(500);
 			
 			CloseBurgerMenu(webDriverWait);
-	        			
-	        PrintSuccesMessage(testCaseName);
+			
+			PrintSuccesMessage(testCaseName);
 		} catch (Exception e) {
 			Screenshot.takeScreenshot(driver, testCaseId + "_" + testCaseName);
             PrintFailMessage(testCaseId, testCaseName, e);                 
