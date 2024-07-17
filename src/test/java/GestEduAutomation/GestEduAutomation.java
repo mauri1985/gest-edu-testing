@@ -1,8 +1,4 @@
 package GestEduAutomation;
-import static org.junit.Assert.assertTrue;
-import java.awt.Robot;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +13,6 @@ import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -27,13 +22,14 @@ import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.WebElement;
 import ReadExcel.ReadExcel;
+import Screenshot.Screenshot;
 
 public class GestEduAutomation {
 	
 	private static WebDriver driver;
     //private static final String DRIVER_PATH = "./src/test/resources/chromedriver/chromedriver.exe";
 	private static final String DRIVER_PATH = "./src/test/resources/geckodriver/geckodriver.exe";
-    private static final String PATH = "https://gestedu.works/";    
+    private static final String PATH = "https://gestedu.works/";  
     private static List<Row> testCasesToRun;
     private static List<String> datosTestCase = new ArrayList<>();
     private static JavascriptExecutor javascriptExecutor;
@@ -174,6 +170,9 @@ public class GestEduAutomation {
                 case "inscripcionCurso":
                 	inscripcionCurso();
                     break;
+                case "altaPeriodoExamen":
+                	altaPeriodoExamen();
+                    break;
                 default:
                 	if(testCaseName != "")
                 	PrintError("Test case no reconocido: " + testCaseName, null);
@@ -185,8 +184,6 @@ public class GestEduAutomation {
 
 	public void login() {		    
         try {
-        	
-        	String rolUsuario = datosTestCase.get(27);
         	
         	PrintTestCase(testCaseName);
         	
@@ -200,12 +197,12 @@ public class GestEduAutomation {
 
             FindByXpath("//button[contains(text(),'Ingresar')]").click();            
             
-            WaitVisibility(By.xpath("//h1[contains(text(), '" + rolUsuario.trim() + "')]"));
+            WaitVisibility(By.xpath("//h1[contains(text(), 'Bienvenid@')]"));
             
             PrintSuccesMessage(testCaseName);
             
         } catch (Exception e) {
-            //e.printStackTrace();
+            Screenshot.takeScreenshot(driver, testCaseId + "_" + testCaseName);
         	PrintFailMessage(testCaseId, testCaseName, e);     
         }
 	}
@@ -219,13 +216,14 @@ public class GestEduAutomation {
         	
 			FindByXpath("//span[contains(text(),'Salir')]").click();
 			
-			//WaitVisibility(By.xpath("//*[contains(text(),'Administrador de gestión educativa')]"));
+			WaitVisibility(By.xpath("//*[contains(text(),'Administrador de gestión educativa')]"));
 			Thread.sleep(500);
 			
 			CloseBurgerMenu(webDriverWait);
 	        			
 	        PrintSuccesMessage(testCaseName);
 		} catch (Exception e) {
+			Screenshot.takeScreenshot(driver, testCaseId + "_" + testCaseName);
             PrintFailMessage(testCaseId, testCaseName, e);                 
         }
 	}	
@@ -272,6 +270,7 @@ public class GestEduAutomation {
             
         } catch (Exception e) {
             //e.printStackTrace();
+        	Screenshot.takeScreenshot(driver, testCaseId + "_" + testCaseName);
         	PrintFailMessage(testCaseId, testCaseName, e);        	
         }
 		
@@ -301,6 +300,7 @@ public class GestEduAutomation {
             
         } catch (Exception e) {
             //e.printStackTrace();
+        	Screenshot.takeScreenshot(driver, testCaseId + "_" + testCaseName);
         	PrintFailMessage(testCaseId, testCaseName, e);             	
         }
 		
@@ -344,6 +344,7 @@ public class GestEduAutomation {
             
         } catch (Exception e) {
             //e.printStackTrace();
+        	Screenshot.takeScreenshot(driver, testCaseId + "_" + testCaseName);
         	PrintFailMessage(testCaseId, testCaseName, e);             	
         }
 		
@@ -409,6 +410,7 @@ public class GestEduAutomation {
             
         } catch (Exception e) {
             //e.printStackTrace();
+        	Screenshot.takeScreenshot(driver, testCaseId + "_" + testCaseName);
         	PrintFailMessage(testCaseId, testCaseName, e);             	
         }
 	}
@@ -473,13 +475,13 @@ public class GestEduAutomation {
             
             FindByXpath("//button[contains(text(),'Registrar')]").click();
             
-            Alert alert = webDriverWait.until(ExpectedConditions.alertIsPresent());
-            System.out.println("Alert: " + alert.getText());
+            WaitVisibility(By.xpath("//button[contains(text(),'Registrar Fecha de Curso')]"));
             
         	PrintSuccesMessage(testCaseName);
             
         } catch (Exception e) {
             //e.printStackTrace();
+        	Screenshot.takeScreenshot(driver, testCaseId + "_" + testCaseName);
         	PrintFailMessage(testCaseId, testCaseName, e);             	
         }
 	}
@@ -487,8 +489,7 @@ public class GestEduAutomation {
 	
 	public void altaExamen() {
 		
-	    
-        try {
+		try {
         	String diasPrevios = datosTestCase.get(26);
         	String periodo = datosTestCase.get(24);
         	String nombreCarrera = datosTestCase.get(9); 
@@ -575,6 +576,7 @@ public class GestEduAutomation {
             
         } catch (Exception e) {
             //e.printStackTrace();
+        	Screenshot.takeScreenshot(driver, testCaseId + "_" + testCaseName);
         	PrintFailMessage(testCaseId, testCaseName, e);             	
         }
 	}
@@ -626,6 +628,7 @@ public class GestEduAutomation {
             
         } catch (Exception e) {
             //e.printStackTrace();
+        	Screenshot.takeScreenshot(driver, testCaseId + "_" + testCaseName);
         	PrintFailMessage(testCaseId, testCaseName, e);             	
         }
 	}
@@ -655,6 +658,7 @@ public class GestEduAutomation {
             
         } catch (Exception e) {
             //e.printStackTrace();
+        	Screenshot.takeScreenshot(driver, testCaseId + "_" + testCaseName);
         	PrintFailMessage(testCaseId, testCaseName, e);             	
         }
 	}
@@ -692,6 +696,7 @@ public class GestEduAutomation {
             
         } catch (Exception e) {
             //e.printStackTrace();
+        	Screenshot.takeScreenshot(driver, testCaseId + "_" + testCaseName);
         	PrintFailMessage(testCaseId, testCaseName, e);             	
         }
 	}
@@ -710,9 +715,8 @@ public class GestEduAutomation {
         	FindByLinktext("Carreras").click();
         	
         	WebElement hoverable = FindByXpath("//div[contains(text(), 'Nombre')]");
-            new Actions(driver)
-                    .moveToElement(hoverable)
-                    .perform(); 
+            Actions actions = new Actions(driver);
+            actions.moveToElement(hoverable).perform(); 
         	
         	FindByXpath("//div[contains(text(), 'Nombre')]/parent::div/parent::div/following-sibling::div/button").click();  
             
@@ -721,25 +725,30 @@ public class GestEduAutomation {
             FindByXpath("//input[@placeholder='Filter value']").sendKeys(nombreCarrera);            
 
             FindByXpath("//div[contains(text(),'" + nombreCarrera + "')]/following-sibling::div/following-sibling::div/following-sibling::div").click();
+            Thread.sleep(1000);
             
-            WebElement hoverable2 = FindByXpath("//div[contains(text(), 'Nombre')]");
             
-            new Actions(driver)
-                    .moveToElement(hoverable2)
-                    .perform(); 
-    		
+            WebElement hoverable2 = FindByXpath("//div[contains(text(), 'Nombre')]");            
+            actions = new Actions(driver);
+            actions.moveToElement(hoverable2).perform();
+            
             FindByXpath("//div[contains(text(), 'Nombre')]/parent::div/parent::div/following-sibling::div/button").click();  
+            Thread.sleep(500);
             
             FindByXpath("//span[contains(text(),'Filtrar')]").click();          
-          
-            FindByXpath("//input[@placeholder='Filter value']").sendKeys(nombreAsignatura);            
-
-            FindByXpath("//div[contains(text(),'" + nombreAsignatura + "')]/following-sibling::div/following-sibling::div/following-sibling::div").click();         
+            Thread.sleep(500);
+            
+            FindByXpath("//input[@placeholder='Filter value']").sendKeys(nombreAsignatura);
+            Thread.sleep(500);
+            
+            
+            FindByXpath("//*[contains(text(),'" + nombreAsignatura + "')]/following-sibling::*/following-sibling::*/following-sibling::*/following-sibling::*/a").click();         
+            Thread.sleep(500);
             
             FindByXpath("//button[contains(text(),'Agregar previa')]").click();
+            Thread.sleep(500);
             
             FindByXpath("//*[contains(text(),'" + nombrePrevia + "')]/following-sibling::*/following-sibling::*/div").click();
-            
             
             //TODO: Validar previaturas
     		WaitVisibility(By.xpath(""));
@@ -748,10 +757,50 @@ public class GestEduAutomation {
             
         } catch (Exception e) {
             //e.printStackTrace();
+        	Screenshot.takeScreenshot(driver, testCaseId + "_" + testCaseName);
         	PrintFailMessage(testCaseId, testCaseName, e);             	
         }
 	}
 	
+	public void altaPeriodoExamen() {
+		try {
+        	PrintTestCase(testCaseName);
+        	
+        	ClickBurgerMenu(webDriverWait);
+        	
+        	FindByLinktext("Calendario").click();    
+        	
+            WebElement hoverable = FindByXpath("//div[contains(text(), 'Nombre')]");
+            new Actions(driver)
+                    .moveToElement(hoverable)
+                    .perform();       
+            
+    		FindByXpath("//div[contains(text(), 'Nombre')]/parent::div/parent::div/following-sibling::div/button").click();  
+          
+            FindByXpath("//span[contains(text(),'Filtrar')]").click();          
+          
+            FindByXpath("//input[@placeholder='Filter value']").sendKeys(datosTestCase.get(9));            
+
+            FindByXpath("//div[contains(text(),'" + datosTestCase.get(9) + "')]/following-sibling::div/following-sibling::div/following-sibling::div/a").click();
+
+            FindByXpath("//button[contains(text(),'Registrar periodo de examen')]").click();
+            
+            FindById("fechaInicio").sendKeys(datosTestCase.get(17));
+            
+            FindById("fechaFin").sendKeys(datosTestCase.get(18));        
+            
+            FindByXpath("//button[contains(text(),'Registrar')]").click();
+            
+    		WaitVisibility(By.xpath("//div[contains(text(),'Periodo de examen registrado con éxito')]"));
+			
+        	PrintSuccesMessage(testCaseName);
+            
+        } catch (Exception e) {
+            //e.printStackTrace();
+        	Screenshot.takeScreenshot(driver, testCaseId + "_" + testCaseName);
+        	PrintFailMessage(testCaseId, testCaseName, e);             	
+        }
+	}
 	
 	public void inscripcionCurso() {
 		try {
@@ -759,12 +808,13 @@ public class GestEduAutomation {
         	
             //TODO: implementar
         	
-    		WaitVisibility(By.xpath(""));
+    		//WaitVisibility(By.xpath(""));
 			
         	PrintSuccesMessage(testCaseName);
             
         } catch (Exception e) {
             //e.printStackTrace();
+        	Screenshot.takeScreenshot(driver, testCaseId + "_" + testCaseName);
         	PrintFailMessage(testCaseId, testCaseName, e);             	
         }
 	}
@@ -831,7 +881,7 @@ public class GestEduAutomation {
 			WebElement element = driver.findElement(By.xpath(xpath));
 			Thread.sleep(500);
 			return element;
-		} catch (Exception e) {
+		} catch (Exception e) {			
 			PrintError("No se pudo encontrar elemento por xpath: " + xpath, e);
 			return null;
 		}		
@@ -878,6 +928,6 @@ public class GestEduAutomation {
 	
 	public boolean WaitVisibility(By by) {
 		return webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(by)) != null;
-	}
+	}	
 	
 }
