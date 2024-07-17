@@ -216,12 +216,12 @@ public class GestEduAutomation {
         	
 			FindByXpath("//span[contains(text(),'Salir')]").click();
 			
+			CloseBurgerMenu(webDriverWait);
+			
 			WaitVisibility(By.xpath("//*[contains(text(),'Administrador de gestión educativa')]"));
 			Thread.sleep(500);
 			
-			CloseBurgerMenu(webDriverWait);
-	        			
-	        PrintSuccesMessage(testCaseName);
+			PrintSuccesMessage(testCaseName);
 		} catch (Exception e) {
 			Screenshot.takeScreenshot(driver, testCaseId + "_" + testCaseName);
             PrintFailMessage(testCaseId, testCaseName, e);                 
